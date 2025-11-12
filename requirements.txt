@@ -1,6 +1,24 @@
-numpy
+# Core ML & Torch
 torch
 torchvision
+torchaudio
+
+# Scientific / numerical tools
+numpy
+pandas
 scikit-learn
-matplotlib
+
+# Image & augmentation libraries
 pillow
+opencv-python
+albumentations
+
+# Visualization
+matplotlib
+seaborn
+
+# Progress bars & utilities
+tqdm
+
+# Optional (for plotting confusion matrix & saving images)
+scipy

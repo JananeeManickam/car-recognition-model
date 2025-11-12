@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>🚗 Car Recognition Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .graphs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .graphs img {
+        width: 300px;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      #graphsSection {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🚗 Car Recognition Dashboard</h1>
+      <form id="predictForm">
+        <input type="file" id="fileInput" accept="image/*" />
+        <button type="button" id="runBtn">Run Prediction</button>
+      </form>
+
+      <h2>Prediction Output:</h2>
+      <pre id="output">No output received.</pre>
+
+      <!-- ✅ Graph section (initially hidden) -->
+      <div id="graphsSection">
+        <h2>Training Graphs:</h2>
+        <div class="graphs" id="graphsDiv"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById("fileInput");
+        const output = document.getElementById("output");
+        const graphsSection = document.getElementById("graphsSection");
+        const graphsDiv = document.getElementById("graphsDiv");
+
+        document.getElementById("runBtn").addEventListener("click", () => {
+          const file = fileInput.files[0];
+          if (!file) return alert("Please select an image first!");
+
+          const formData = new FormData();
+          formData.append("file", file);
+          output.textContent = "Running prediction... Please wait.";
+          graphsSection.style.display = "none"; // Hide old graphs while predicting
+
+          fetch("http://127.0.0.1:5000/predict", {
+            method: "POST",
+            body: formData,
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.error) {
+                output.textContent = "❌ Error: " + data.error;
+                return;
+              }
+
+              // ✅ Print prediction output
+              output.textContent = data.output;
+
+              // ✅ Then show training graphs
+              showTrainingGraphs();
+            })
+            .catch((err) => {
+              output.textContent = "❌ Error: " + err.message;
+            });
+        });
+
+        // ✅ Function to dynamically display training graphs
+        function showTrainingGraphs() {
+          const t = new Date().getTime(); // cache-busting timestamp
+          graphsDiv.innerHTML = `
+            <img src="../results/resnet18_confusion_matrix.png?t=${t}" alt="ResNet18 Confusion" />
+            <img src="../results/lanet_confusion_matrix.png?t=${t}" alt="LANet Confusion" />
+            <img src="../results/confusion_matrix.png?t=${t}" alt="Confusion Matrix" />
+            <img src="../results/results_graph.png?t=${t}" alt="Training Results Graph" />
+          `;
+          graphsSection.style.display = "block";
+        }
+      });
+    </script>
+  </body>
+</html>
